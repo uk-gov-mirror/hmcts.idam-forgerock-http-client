@@ -28,7 +28,9 @@ project.ext {
     junit_version = "4.12"
 }
 
-version = '3.0.4'
+def buildNumber = System.getenv("RELEASE_VERSION")?.replace("refs/tags/", "") ?: "DEV-SNAPSHOT"
+
+version = buildNumber
 group = 'com.github.hmcts'
 
 description = """idam-forgerock-http-client"""
