@@ -24,7 +24,7 @@ import java.util.Optional;
 /**
  * User
  */
-@javax.annotation.processing.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2019-03-25T13:48:59.475Z")
+@javax.annotation.processing.Generated(value = "io.swagger.codegen.languages.JavaClientCodegen", date = "2026-04-01T13:34:00.000Z")
 public class IdmUser {
     @JsonProperty("_id")
     private String id = null;
@@ -847,7 +847,6 @@ public class IdmUser {
         sb.append("class User {\n");
 
         sb.append("    id: ").append(toIndentedString(id)).append("\n");
-        sb.append("    password: ").append(toIndentedString(password)).append("\n");
         sb.append("    kbaInfo: ").append(toIndentedString(kbaInfo)).append("\n");
         sb.append("    preferences: ").append(toIndentedString(preferences)).append("\n");
         sb.append("    mail: ").append(toIndentedString(mail)).append("\n");
