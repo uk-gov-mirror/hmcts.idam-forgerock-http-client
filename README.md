@@ -46,6 +46,33 @@ titled **Fixing the yaml** below
 
 the inputs are `path to file`, `package`, `Object mappings`
 
+## Applying Generated Changes
+
+This repository does not publish code directly from `build/src/generated/java`.
+`generateApi` writes generated sources there for review, but the build and publish
+steps use the committed sources in `src/main/java`.
+
+Recommended workflow:
+
+1. Update the YAML in `src/main/resources` and any `generateApi` entry in `build.gradle`.
+2. Run `./gradlew generateApi`.
+3. Review the generated output in `build/src/generated/java`.
+4. Manually merge the required changes into `src/main/java`.
+
+Do not replace the whole `src/main/java` tree with generated output. The committed
+sources contain manual changes that are not reproduced by the generator, including
+renamed models, convenience methods, metadata handling, and other fixes added over time.
+
+In practice, treat the generated files as a draft. Copy over only the parts you intend
+to change, preserve the existing package/class names used by the published client, and
+check for any hand-maintained behaviour before committing.
+
+After merging:
+
+1. Run `./gradlew build`.
+2. Commit the updated YAML and Java sources together.
+3. Publishing is done from the committed sources with `./gradlew publish`.
+
 Object mappings are basically if you want to reference a definition like 
 ``'#/definitions/MySpecialObject'``  but `MySpecialObject` is not
 defined specifically within the same yaml spec or will not be in the same package.

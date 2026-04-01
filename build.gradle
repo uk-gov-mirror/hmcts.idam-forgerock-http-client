@@ -1,9 +1,6 @@
-import io.swagger.codegen.DefaultGenerator
-import io.swagger.codegen.config.CodegenConfigurator
-
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath 'io.swagger:swagger-codegen:2.4.32'
@@ -14,6 +11,9 @@ plugins {
     id 'java'
     id 'maven-publish'
 }
+
+def javaToolchainVersion = 17
+def javaReleaseVersion = 11
 
 
 project.ext {
@@ -36,24 +36,21 @@ group = 'com.github.hmcts'
 description = """idam-forgerock-http-client"""
 
 
-sourceCompatibility = 11
-targetCompatibility = 11
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(javaToolchainVersion)
+    }
+}
 
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+    options.release = javaReleaseVersion
 }
 
 repositories {
     mavenCentral()
-    maven { url 'https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1' }
-    jcenter()
-}
-
-configurations {
-    // generatedCompile
-    // compile.extendsFrom generatedCompile
-    compile
+    maven { url = uri('https://pkgs.dev.azure.com/hmcts/Artifacts/_packaging/hmcts-lib/maven/v1') }
 }
 
 dependencies {
@@ -76,8 +73,14 @@ dependencies {
     testImplementation 'org.mockito:mockito-inline:3.12.4'
 }
 
+def loadBuildscriptClass(String className) {
+    Class.forName(className, true, this.class.classLoader)
+}
+
 def generateCodeFromSwagger(swaggerSourceFile, packageName, importMappings) {
-    def config = new CodegenConfigurator()
+    def config = loadBuildscriptClass('io.swagger.codegen.config.CodegenConfigurator')
+        .getDeclaredConstructor()
+        .newInstance()
     config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
     config.setOutputDir("$buildDir")
     config.setLang('java')
@@ -94,7 +97,11 @@ def generateCodeFromSwagger(swaggerSourceFile, packageName, importMappings) {
     if (importMappings != null) {
         ((LinkedHashMap<String, String>) importMappings).each { k, v -> config.addImportMapping(k, v) }
     }
-    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+    loadBuildscriptClass('io.swagger.codegen.DefaultGenerator')
+        .getDeclaredConstructor()
+        .newInstance()
+        .opts(config.toClientOptInput())
+        .generate()
 }
 
 task generateApi {
@@ -149,7 +156,7 @@ sourceSets {
     }
 }
 
-jar {
+tasks.named('jar') {
     // from sourceSets.generated.output
 }
 
@@ -163,9 +170,9 @@ publishing {
     publications {
         Main(MavenPublication) {
             from components.java
-            groupId project.group
-            artifactId rootProject.name
-            version project.version
+            groupId = project.group
+            artifactId = rootProject.name
+            version = project.version
         }
     }
     repositories {
